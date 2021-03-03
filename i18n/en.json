@@ -1,0 +1,11 @@
+{
+  "hint_username": "Username",
+  "hint_password" : "Password",
+  "hint_mobile": "Mobile Number",
+  "hint_name": "Name",
+  "hint_last_name": "Last Name",
+  "hint_email": "Email",
+  "register": "Register",
+  "terms_and_conditions": "terms_and_conditions",
+  "home" : "Home"
+}
