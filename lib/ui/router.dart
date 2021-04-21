@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_blue/flutter_blue.dart';
-import 'package:ams/core/models/rule.dart';
-import 'package:ams/core/viewmodels/home_model.dart';
 import 'package:ams/locator.dart';
 import 'package:ams/ui/views/find_devices_view.dart';
 import 'package:ams/ui/views/home_view.dart';

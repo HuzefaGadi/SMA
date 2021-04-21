@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:ams/core/services/home_service.dart';
+import 'package:ams/core/utils/characteristics_util.dart';
 import 'package:ams/core/viewmodels/base_model.dart';
 import 'package:ams/locator.dart';
 import 'package:flutter_blue/flutter_blue.dart';
@@ -6,35 +9,64 @@ import 'package:flutter_blue/flutter_blue.dart';
 class HomeModel extends BaseModel {
   final HomeService _homeService = locator<HomeService>();
   BluetoothDevice _bluetoothDevice;
-  BluetoothCharacteristic _powerCharacteristic, _loadCharacteristic, _statusCharacteristic;
-  String power, load, status;
+  List<BluetoothCharacteristic> characteristics = [];
   String response = "";
+  List<StreamController> _streamControllers = [];
+  List<Stream> streams = [];
+  List<Sink> sinks = [];
+  List<String> characteristicUUIDs = [];
+  String commonCharSuffix = "86686a-53dc-25b3-0c4a-f0e10c8dee20";
+  int totalReadings = 40;
+  List<String> readingTitles = [];
+  HomeModel() {
+    _streamControllers = [];
+    streams = [];
+    sinks = [];
+    for (int i = 0; i < totalReadings; i++) {
+      _streamControllers.add(StreamController<String>());
+      streams.add(_streamControllers[i].stream.asBroadcastStream());
+      sinks.add(_streamControllers[i].sink);
+    }
 
-  BluetoothCharacteristic get powerCharacteristic => _powerCharacteristic;
-
-  BluetoothCharacteristic get loadCharacteristic => _loadCharacteristic;
-
-  BluetoothCharacteristic get statusCharacteristic => _statusCharacteristic;
-
-  Future<void> setPowerCharacteristic(BluetoothCharacteristic characteristic) async {
-    print("setPowerCharacteristic");
-    _powerCharacteristic = characteristic;
-    await _powerCharacteristic.setNotifyValue(true);
-    _powerCharacteristic.value.listen(getPowerCharesteristicListener());
+    for (int i = 0; i < totalReadings / 3; i++) {
+      characteristicUUIDs.add(i.toRadixString(16).padLeft(2, '0').toLowerCase() + commonCharSuffix);
+    }
+    characteristics = List.filled(totalReadings, null);
+    readingTitles.add("Port");
+    readingTitles.add("Load");
+    readingTitles.add("Status");
+    readingTitles.add("Fault");
+    readingTitles.add("Req V");
+    readingTitles.add("Req C");
+    readingTitles.add("Req P");
+    readingTitles.add("Alloc P");
+    readingTitles.add("Del V");
+    readingTitles.add("Del C");
+    readingTitles.add("Del P");
+    readingTitles.add("Spare");
   }
 
-  Future<void> setLoadCharacteristic(BluetoothCharacteristic characteristic) async {
-    print("setLoadCharacteristic");
-    _loadCharacteristic = characteristic;
-    await _loadCharacteristic.setNotifyValue(true);
-    _loadCharacteristic.value.listen(getLoadCharacteristicListener());
+  Future<void> setCharacteristics(List<BluetoothCharacteristic> chars) async {
+    for (BluetoothCharacteristic characteristic in chars) {
+      await setCharacteristic(characteristic);
+    }
   }
 
-  Future<void> setStatusCharacteristic(BluetoothCharacteristic characteristic) async {
-    print("setStatusCharacteristic");
-    _statusCharacteristic = characteristic;
-    await _statusCharacteristic.setNotifyValue(true);
-    _statusCharacteristic.value.listen(getStatusCharacteristicListener());
+  Future<void> setCharacteristic(BluetoothCharacteristic characteristic) async {
+    try {
+      int characteristicIndex = characteristicUUIDs.indexOf(characteristic.uuid.toString());
+      print("setCharacteristic uuid ${characteristic.uuid.toString()}");
+      print("setCharacteristic index ${characteristicIndex}");
+
+      characteristics[characteristicIndex] = characteristic;
+
+      characteristics[characteristicIndex]
+          .value
+          .listen(new CharacteristicUtils().getCharacteristicListener(this, characteristicIndex * 3));
+      await characteristic.setNotifyValue(true);
+    } catch (e) {
+      print(e);
+    }
   }
 
   void setBluetoothDevice(BluetoothDevice device) {
@@ -60,69 +92,6 @@ class HomeModel extends BaseModel {
     return _bluetoothDevice;
   }
 
-  Function getPowerCharesteristicListener() {
-    return (value) {
-      try {
-        print("getPowerCharesteristicListener");
-        print(value);
-        String abc = "";
-        for (int i in value) {
-          abc += '${i} ';
-        }
-        response = abc;
-        print(response);
-        if (value.isNotEmpty) {
-          power = response;
-          setState(ViewState.Idle);
-        }
-      } catch (e) {
-        print(e);
-      }
-    };
-  }
-
-  Function getLoadCharacteristicListener() {
-    return (value) {
-      try {
-        print("getLoadCharacteristicListener");
-        print(value);
-        String abc = "";
-        for (int i in value) {
-          abc += '${i} ';
-        }
-        response = abc;
-        print(response);
-        if (value.isNotEmpty) {
-          load = response;
-          setState(ViewState.Idle);
-        }
-      } catch (e) {
-        print(e);
-      }
-    };
-  }
-
-  Function getStatusCharacteristicListener() {
-    return (value) {
-      try {
-        print("getStatusCharacteristicListener");
-        print(value);
-        String abc = "";
-        for (int i in value) {
-          abc += '${i} ';
-        }
-        response = abc;
-        print(response);
-        if (value.isNotEmpty) {
-          status = response;
-          setState(ViewState.Idle);
-        }
-      } catch (e) {
-        print(e);
-      }
-    };
-  }
-
   List<int> getInt32Bytes(x) {
     List<int> bytes = [0, 0, 0, 0];
     for (var i = 0; i < 4; i++) {
@@ -139,5 +108,17 @@ class HomeModel extends BaseModel {
       x = x >> 8;
     }
     return bytes;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    clearStreams();
+  }
+
+  void clearStreams() {
+    for (int i = 0; i < _streamControllers.length; i++) {
+      _streamControllers[i].close();
+    }
   }
 }

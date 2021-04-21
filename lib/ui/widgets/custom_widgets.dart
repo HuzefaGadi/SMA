@@ -30,9 +30,9 @@ class MobiButton extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: color ?? Colors.redAccent),
         height: height,
         width: width,
-        color: color ?? Colors.redAccent,
         child: Center(
           child: Padding(
             padding: padding ?? EdgeInsets.all(0),
@@ -88,7 +88,7 @@ class MobiTextFormField extends StatelessWidget {
         controller: controller,
         readOnly: readOnly ?? false,
         decoration: InputDecoration(
-          enabledBorder: OutlineInputBorder(),
+          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
           focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blueAccent)),
           labelText: label,
           prefixIcon: prefixIcon,
@@ -174,11 +174,13 @@ class MobiText extends StatelessWidget {
 
     children.add(Flexible(
       fit: FlexFit.loose,
-      child: Text(
-        text,
-        overflow: textOverflow,
-        softWrap: true,
-        style: this.textStyle ?? TextStyle(fontSize: 20),
+      child: Container(
+        child: Text(
+          text,
+          overflow: textOverflow,
+          softWrap: true,
+          style: this.textStyle ?? TextStyle(fontSize: 15),
+        ),
       ),
     ));
     return Theme(

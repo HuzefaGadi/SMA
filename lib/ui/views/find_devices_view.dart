@@ -1,11 +1,15 @@
+import 'package:bluetooth_enable/bluetooth_enable.dart';
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:ams/widgets.dart';
+import 'package:location/location.dart';
 
 class FindDevicesScreen extends StatefulWidget {
   static const routeName = "findDevicesScreen";
   String bleDevice;
+
   @override
   _FindDevicesScreenState createState() => _FindDevicesScreenState();
 
@@ -19,9 +23,29 @@ class FindDevicesScreen extends StatefulWidget {
 class _FindDevicesScreenState extends State<FindDevicesScreen> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => FlutterBlue.instance.startScan(timeout: Duration(seconds: 4)));
+
+    Location location = new Location();
+    bool _serviceEnabled;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      BluetoothEnable.enableBluetooth.then((result) async {
+        if (result == "true") {
+          _serviceEnabled = await location.serviceEnabled();
+          if (!_serviceEnabled) {
+            _serviceEnabled = await location.requestService();
+            if (!_serviceEnabled) {
+              BotToast.showText(text: "Please turn on your GPS");
+              return;
+            }
+          }
+          FlutterBlue.instance.startScan(timeout: Duration(seconds: 4));
+        } else if (result == "false") {
+          //Bluetooth has not been enabled
+          BotToast.showText(text: "Please turn on your Bluetooth");
+          return;
+        }
+      });
+    });
   }
 
   @override
