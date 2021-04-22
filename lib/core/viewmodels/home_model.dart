@@ -16,8 +16,11 @@ class HomeModel extends BaseModel {
   List<Sink> sinks = [];
   List<String> characteristicUUIDs = [];
   String commonCharSuffix = "86686a-53dc-25b3-0c4a-f0e10c8dee20";
+  String commonCharSuffix2 = "87686a-53dc-25b3-0c4a-f0e10c8dee20";
   int totalReadings = 40;
   List<String> readingTitles = [];
+  BluetoothCharacteristic _refreshCharacteristic;
+
   HomeModel() {
     _streamControllers = [];
     streams = [];
@@ -31,6 +34,7 @@ class HomeModel extends BaseModel {
     for (int i = 0; i < totalReadings / 3; i++) {
       characteristicUUIDs.add(i.toRadixString(16).padLeft(2, '0').toLowerCase() + commonCharSuffix);
     }
+    characteristicUUIDs.add("02" + commonCharSuffix2);
     characteristics = List.filled(totalReadings, null);
     readingTitles.add("Port");
     readingTitles.add("Load");
@@ -66,6 +70,25 @@ class HomeModel extends BaseModel {
       await characteristic.setNotifyValue(true);
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future<void> setCharacteristicForRefresh(BluetoothCharacteristic characteristic) async {
+    try {
+      _refreshCharacteristic = characteristic;
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> refreshPage() async {
+    if (_refreshCharacteristic != null) {
+      List<int> list = [1, 0, 0, 0];
+      await _refreshCharacteristic.write(list);
+      list[0] = 2;
+      await _refreshCharacteristic.write(list);
+      list[0] = 3;
+      await _refreshCharacteristic.write(list);
     }
   }
 

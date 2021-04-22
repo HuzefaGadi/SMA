@@ -39,6 +39,7 @@ class _AutoViewState extends State<AutoView> {
   void initState() {
     model = widget.homeModel;
     super.initState();
+    model.refreshPage();
     // timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
     //   model.sinks[CharacteristicUtils.allocPower1].add((Random().nextInt(20) + 1).toString());
     //   model.sinks[CharacteristicUtils.delPower1].add((Random().nextInt(10) + 1).toString());
@@ -96,12 +97,14 @@ class _AutoViewState extends State<AutoView> {
         body: StreamBuilder6<String, String, String, String, String, String>(
             initialData: Tuple6("0", "0", "0", "0", "0", "0"),
             streams: Tuple6(
-                widget.homeModel.streams[CharacteristicUtils.allocPower1],
                 widget.homeModel.streams[CharacteristicUtils.delPower1],
-                widget.homeModel.streams[CharacteristicUtils.allocPower2],
+                widget.homeModel.streams[CharacteristicUtils.allocPower1],
                 widget.homeModel.streams[CharacteristicUtils.delPower2],
-                widget.homeModel.streams[CharacteristicUtils.allocPower3],
-                widget.homeModel.streams[CharacteristicUtils.delPower3]),
+                widget.homeModel.streams[CharacteristicUtils.allocPower2],
+                widget.homeModel.streams[CharacteristicUtils.delPower3],
+                widget.homeModel.streams[CharacteristicUtils.allocPower3]
+        ),
+
             builder: (context, snapshots) {
               return SingleChildScrollView(
                 child: Column(
@@ -119,11 +122,11 @@ class _AutoViewState extends State<AutoView> {
                               SizedBox(
                                 height: 10,
                               ),
-                              Text("Alloc Power ${snapshots.item1.data} W"),
+                              Text("Alloc Power ${snapshots.item2.data} W"),
                               SizedBox(
                                 height: 10,
                               ),
-                              Text("Del Power ${snapshots.item2.data} W"),
+                              Text("Del Power ${snapshots.item1.data} W"),
                             ],
                           ),
                         ),
@@ -134,11 +137,11 @@ class _AutoViewState extends State<AutoView> {
                               SizedBox(
                                 height: 10,
                               ),
-                              Text("Alloc Power ${snapshots.item3.data} W"),
+                              Text("Alloc Power ${snapshots.item4.data} W"),
                               SizedBox(
                                 height: 10,
                               ),
-                              Text("Del Power ${snapshots.item4.data} W"),
+                              Text("Del Power ${snapshots.item3.data} W"),
                             ],
                           ),
                         ),
@@ -149,11 +152,11 @@ class _AutoViewState extends State<AutoView> {
                               SizedBox(
                                 height: 10,
                               ),
-                              Text("Alloc Power ${snapshots.item5.data} W"),
+                              Text("Alloc Power ${snapshots.item6.data} W"),
                               SizedBox(
                                 height: 10,
                               ),
-                              Text("Del Power ${snapshots.item6.data} W"),
+                              Text("Del Power ${snapshots.item5.data} W"),
                             ],
                           ),
                         ),
@@ -175,11 +178,9 @@ class _AutoViewState extends State<AutoView> {
                         radiusFactor: 1,
                         ranges: <GaugeRange>[
                           GaugeRange(
-                              startValue: getValue(snapshots.item1.data) +
+                              startValue:
                                   getValue(snapshots.item2.data) +
-                                  getValue(snapshots.item3.data) +
                                   getValue(snapshots.item4.data) +
-                                  getValue(snapshots.item5.data) +
                                   getValue(snapshots.item6.data),
                               endValue: 80,
                               color: Colors.grey.withAlpha(colorOpacity),
@@ -195,14 +196,14 @@ class _AutoViewState extends State<AutoView> {
                               endWidth: 1),
                           GaugeRange(
                               startValue: getValue(snapshots.item1.data),
-                              endValue: getValue(snapshots.item1.data) + getValue(snapshots.item2.data),
+                              endValue: getValue(snapshots.item2.data),
                               color: Colors.green[100].withAlpha(colorOpacity),
                               sizeUnit: GaugeSizeUnit.factor,
                               startWidth: 1,
                               endWidth: 1),
                           GaugeRange(
-                              startValue: getValue(snapshots.item1.data) + getValue(snapshots.item2.data),
-                              endValue: getValue(snapshots.item1.data) +
+                              startValue: getValue(snapshots.item2.data),
+                              endValue:
                                   getValue(snapshots.item2.data) +
                                   getValue(snapshots.item3.data),
                               color: Colors.blue[400].withAlpha(colorOpacity),
@@ -210,25 +211,23 @@ class _AutoViewState extends State<AutoView> {
                               startWidth: 1,
                               endWidth: 1),
                           GaugeRange(
-                              startValue: getValue(snapshots.item1.data) +
+                              startValue:
                                   getValue(snapshots.item2.data) +
                                   getValue(snapshots.item3.data),
-                              endValue: getValue(snapshots.item1.data) +
+                              endValue:
                                   getValue(snapshots.item2.data) +
-                                  getValue(snapshots.item3.data) +
                                   getValue(snapshots.item4.data),
                               color: Colors.blue[100].withAlpha(colorOpacity),
                               sizeUnit: GaugeSizeUnit.factor,
                               startWidth: 1,
                               endWidth: 1),
                           GaugeRange(
-                              startValue: getValue(snapshots.item1.data) +
+                              startValue:
                                   getValue(snapshots.item2.data) +
-                                  getValue(snapshots.item3.data) +
+
                                   getValue(snapshots.item4.data),
-                              endValue: getValue(snapshots.item1.data) +
+                              endValue:
                                   getValue(snapshots.item2.data) +
-                                  getValue(snapshots.item3.data) +
                                   getValue(snapshots.item4.data) +
                                   getValue(snapshots.item5.data),
                               color: Colors.red[400].withAlpha(colorOpacity),
@@ -236,16 +235,15 @@ class _AutoViewState extends State<AutoView> {
                               startWidth: 1,
                               endWidth: 1),
                           GaugeRange(
-                              startValue: getValue(snapshots.item1.data) +
+                              startValue:
                                   getValue(snapshots.item2.data) +
-                                  getValue(snapshots.item3.data) +
                                   getValue(snapshots.item4.data) +
                                   getValue(snapshots.item5.data),
-                              endValue: getValue(snapshots.item1.data) +
+                              endValue:
                                   getValue(snapshots.item2.data) +
-                                  getValue(snapshots.item3.data) +
+
                                   getValue(snapshots.item4.data) +
-                                  getValue(snapshots.item5.data) +
+
                                   getValue(snapshots.item6.data),
                               color: Colors.red[100].withAlpha(colorOpacity),
                               sizeUnit: GaugeSizeUnit.factor,
@@ -256,7 +254,7 @@ class _AutoViewState extends State<AutoView> {
                           MarkerPointer(
                             markerWidth: 50,
                             markerHeight: 50,
-                            value: 10,
+                            value:  getValue(snapshots.item2.data),
                             color: Colors.green,
                             enableDragging: true,
                             markerOffset: -30,
@@ -264,7 +262,7 @@ class _AutoViewState extends State<AutoView> {
                           MarkerPointer(
                             markerWidth: 50,
                             markerHeight: 50,
-                            value: 30,
+                            value: getValue(snapshots.item2.data)+getValue(snapshots.item4.data),
                             color: Colors.blue,
                             enableDragging: true,
                             markerOffset: -30,
@@ -272,7 +270,7 @@ class _AutoViewState extends State<AutoView> {
                           MarkerPointer(
                             markerWidth: 50,
                             markerHeight: 50,
-                            value: 50,
+                            value:  getValue(snapshots.item2.data)+getValue(snapshots.item4.data)+getValue(snapshots.item6.data),
                             color: Colors.red,
                             enableDragging: true,
                             markerOffset: -30,
@@ -281,7 +279,7 @@ class _AutoViewState extends State<AutoView> {
                             needleLength: 0.9,
                             needleStartWidth: 2,
                             needleEndWidth: 2,
-                            value: getValue(snapshots.item1.data) + getValue(snapshots.item2.data),
+                            value:  getValue(snapshots.item2.data),
                             enableDragging: false,
                             knobStyle: getKnobStyle(),
                           ),
@@ -289,9 +287,9 @@ class _AutoViewState extends State<AutoView> {
                             needleLength: 0.9,
                             needleStartWidth: 2,
                             needleEndWidth: 2,
-                            value: getValue(snapshots.item1.data) +
+                            value:
                                 getValue(snapshots.item2.data) +
-                                getValue(snapshots.item3.data) +
+
                                 getValue(snapshots.item4.data),
                             enableDragging: false,
                             knobStyle: getKnobStyle(),
@@ -300,11 +298,11 @@ class _AutoViewState extends State<AutoView> {
                             needleLength: 0.9,
                             needleStartWidth: 2,
                             needleEndWidth: 2,
-                            value: getValue(snapshots.item1.data) +
+                            value:
                                 getValue(snapshots.item2.data) +
-                                getValue(snapshots.item3.data) +
+
                                 getValue(snapshots.item4.data) +
-                                getValue(snapshots.item5.data) +
+
                                 getValue(snapshots.item6.data),
                             enableDragging: false,
                             knobStyle: getKnobStyle(),

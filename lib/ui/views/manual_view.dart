@@ -80,6 +80,7 @@ class DeviceView extends StatelessWidget {
   static const routeName = "deviceScreen";
   final HomeModel model;
   final String serviceUUID = "1842467c-7cbc-11e9-8f9e-2a86e4085a59";
+  final String serviceUUID2 = "1942467c-7cbc-11e9-8f9e-2a86e4085a59";
   final String loadCharUUID = "0186686a-53dc-25b3-0c4a-f0e10c8dee20";
   final String statusCharUUID = "0286686a-53dc-25b3-0c4a-f0e10c8dee20";
   final String deliveredPowerCharUUID = "0a86686a-53dc-25b3-0c4a-f0e10c8dee20";
@@ -143,11 +144,23 @@ class DeviceView extends StatelessWidget {
                       //   }
                       // }
 
-                      List<BluetoothService> list =
-                          snapshot.data.where((service) => service.uuid.toString() == serviceUUID).toList();
+                      List<BluetoothService> list = snapshot.data
+                          .where((service) =>
+                              service.uuid.toString() == serviceUUID || service.uuid.toString() == serviceUUID2)
+                          .toList();
 
                       if (list.isNotEmpty) {
-                        BluetoothService service = list[0];
+                        BluetoothService service = list[0].uuid.toString() == serviceUUID ? list[0] : list[1];
+                        BluetoothService service2 = list[0].uuid.toString() == serviceUUID2 ? list[0] : list[1];
+                        if (service2 != null) {
+                          List<BluetoothCharacteristic> characteristics = service2.characteristics
+                              .where((characteristic) =>
+                                  characteristic.uuid.toString() == ("02" + model.commonCharSuffix2))
+                              .toList();
+                          if (characteristics.isNotEmpty) {
+                            model.setCharacteristicForRefresh(characteristics[0]);
+                          }
+                        }
                         if (service != null) {
                           List<BluetoothCharacteristic> characteristics = service.characteristics
                               .where(
@@ -196,6 +209,7 @@ class _DashboardWidgetState extends State<DashboardWidget> {
   @override
   void initState() {
     super.initState();
+    widget.model.refreshPage();
   }
 
   @override
